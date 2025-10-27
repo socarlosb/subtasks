@@ -164,6 +164,7 @@ class SubtaskApp {
     grayToBlueGradient.setAttribute("y1", "0%");
     grayToBlueGradient.setAttribute("x2", "100%");
     grayToBlueGradient.setAttribute("y2", "0%");
+    grayToBlueGradient.setAttribute("gradientUnits", "objectBoundingBox");
 
     const stop1 = document.createElementNS(
       "http://www.w3.org/2000/svg",
@@ -192,6 +193,48 @@ class SubtaskApp {
       ) {
         const path = this.createConnectionPath(i, i + 1);
         if (path) {
+          // If this path has a custom gradient, add it to defs
+          const gradientId = path.getAttribute("data-gradient-id");
+          if (gradientId) {
+            const gradientData = JSON.parse(path.getAttribute("data-gradient"));
+
+            const gradient = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "linearGradient"
+            );
+            gradient.setAttribute("id", gradientId);
+            gradient.setAttribute("x1", gradientData.x1);
+            gradient.setAttribute("y1", gradientData.y1);
+            gradient.setAttribute("x2", gradientData.x2);
+            gradient.setAttribute("y2", gradientData.y2);
+            gradient.setAttribute("gradientUnits", "userSpaceOnUse");
+
+            const stop1 = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "stop"
+            );
+            stop1.setAttribute("offset", "0%");
+            stop1.setAttribute("stop-color", "#969696"); // gray
+
+            const stop2 = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "stop"
+            );
+            stop2.setAttribute("offset", "100%");
+            stop2.setAttribute("stop-color", "#0078d4"); // blue
+
+            gradient.appendChild(stop1);
+            gradient.appendChild(stop2);
+            defs.appendChild(gradient);
+
+            // Set the stroke to use this gradient
+            path.style.stroke = `url(#${gradientId})`;
+
+            // Clean up the data attributes
+            path.removeAttribute("data-gradient-id");
+            path.removeAttribute("data-gradient");
+          }
+
           svg.appendChild(path);
         }
       }
@@ -239,6 +282,48 @@ class SubtaskApp {
     // Only apply gradient to the line connecting TO the final selection
     const finalSelectionColumn = this.getFinalSelectionColumn();
     if (toColumn === finalSelectionColumn && finalSelectionColumn > 0) {
+      // Create a unique gradient for this specific path
+      const gradientId = `gradient-${fromColumn}-${toColumn}`;
+      const gradient = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "linearGradient"
+      );
+      gradient.setAttribute("id", gradientId);
+      gradient.setAttribute("x1", fromX);
+      gradient.setAttribute("y1", fromY);
+      gradient.setAttribute("x2", toX);
+      gradient.setAttribute("y2", toY);
+      gradient.setAttribute("gradientUnits", "userSpaceOnUse");
+
+      const stop1 = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "stop"
+      );
+      stop1.setAttribute("offset", "0%");
+      stop1.setAttribute("stop-color", "#969696"); // gray
+
+      const stop2 = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "stop"
+      );
+      stop2.setAttribute("offset", "100%");
+      stop2.setAttribute("stop-color", "#0078d4"); // blue
+
+      gradient.appendChild(stop1);
+      gradient.appendChild(stop2);
+
+      // Add gradient to defs (we'll need to get the parent SVG)
+      path.setAttribute("data-gradient-id", gradientId);
+      path.setAttribute(
+        "data-gradient",
+        JSON.stringify({
+          x1: fromX,
+          y1: fromY,
+          x2: toX,
+          y2: toY,
+        })
+      );
+
       path.classList.add("to-final");
     }
 
