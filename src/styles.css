@@ -5,13 +5,11 @@
   --text-primary: #cccccc;
   --text-secondary: #969696;
   --text-tertiary: #6a6a6a;
-  --accent-blue: #0078d4;
-  --accent-yellow: #ffb900;
-  --border-color: #3c3c3c;
+  --accent: #005fa3;
+  --border-color: #2e2e2e;
   --hover-bg: #2a2d2e;
   --selected-bg: #094771;
   --checkbox-border: #6a6a6a;
-  --checkbox-checked: #0078d4;
 }
 
 * {
@@ -86,6 +84,12 @@ body {
   transition: all 0.2s ease;
 }
 
+.options-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
 .options-btn:hover {
   background-color: var(--hover-bg);
   color: var(--text-primary);
@@ -140,7 +144,6 @@ body {
   padding: 6px 8px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
   transition: all 0.2s ease;
 }
 
@@ -152,6 +155,19 @@ body {
 .copy-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.copy-btn:active:not(:disabled) {
+  transform: scale(1.1);
+  transition: transform 0.1s ease;
+  background-color: var(--bg-primary);
+  border-radius: 100%;
+}
+
+.copy-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
 }
 
 .tasks-container {
@@ -187,28 +203,11 @@ body {
 .task-item.selected {
   background-color: var(--hover-bg);
   position: relative;
-  border: 2px solid var(--border-color);
   border-radius: 4px;
 }
 
 .task-item.selected.final-selection {
-  background-color: var(--selected-bg);
-  border: 2px solid var(--accent-blue);
-}
-
-.task-item.selected::before {
-  content: "";
-  position: absolute;
-  left: -2px;
-  top: -2px;
-  bottom: -2px;
-  width: 4px;
-  background-color: var(--border-color);
-  border-radius: 2px 0 0 2px;
-}
-
-.task-item.selected.final-selection::before {
-  background-color: var(--accent-blue);
+  background-color: var(--accent);
 }
 
 /* Hide the connecting arrow for the last column */
@@ -236,10 +235,6 @@ body {
   animation: drawPath 0.5s ease-in-out forwards;
 }
 
-.connection-path.to-final {
-  stroke: url(#grayToBlueGradient);
-}
-
 @keyframes drawPath {
   to {
     stroke-dashoffset: 0;
@@ -253,7 +248,7 @@ body {
 .task-icon {
   width: 16px;
   height: 16px;
-  margin-right: 12px;
+  margin-inline-end: 10px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -275,7 +270,7 @@ body {
 
 .task-input {
   background: var(--bg-primary);
-  border: 2px solid var(--accent-blue);
+  border: 2px solid var(--accent);
   color: var(--text-primary);
   padding: 10px 12px;
   border-radius: 8px;
@@ -283,10 +278,11 @@ body {
   width: 100%;
   outline: none;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .task-input:focus {
-  border-color: var(--accent-blue);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
 }
 
@@ -310,20 +306,28 @@ body {
 .icon-progress {
   width: 16px;
   height: 16px;
-  border: 2px solid var(--text-secondary);
   border-radius: 50%;
-  position: relative;
   overflow: hidden;
 }
 
-.icon-progress::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: var(--text-secondary);
-  transition: height 0.3s ease;
+.icon-progress svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* Start from top */
+}
+
+.icon-progress .progress-bg {
+  fill: none;
+  stroke: var(--text-tertiary);
+  stroke-width: 2;
+}
+
+.icon-progress .progress-fill {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s ease;
 }
 
 .icon-complete {
@@ -347,7 +351,6 @@ body {
   height: 20px;
   border: 2px solid var(--checkbox-border);
   border-radius: 4px;
-  margin-right: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;

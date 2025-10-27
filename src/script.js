@@ -178,7 +178,7 @@ class SubtaskApp {
       "stop"
     );
     stop2.setAttribute("offset", "100%");
-    stop2.setAttribute("stop-color", "#0078d4"); // blue
+    stop2.setAttribute("stop-color", "var(--accent)");
 
     grayToBlueGradient.appendChild(stop1);
     grayToBlueGradient.appendChild(stop2);
@@ -221,7 +221,7 @@ class SubtaskApp {
               "stop"
             );
             stop2.setAttribute("offset", "100%");
-            stop2.setAttribute("stop-color", "#0078d4"); // blue
+            stop2.setAttribute("stop-color", "var(--accent)"); // blue
 
             gradient.appendChild(stop1);
             gradient.appendChild(stop2);
@@ -435,9 +435,37 @@ class SubtaskApp {
     } else if (progressInfo.percentage === 0) {
       return '<div class="icon-empty"></div>';
     } else {
-      return `<div class="icon-progress" style="--progress: ${progressInfo.percentage}%">
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: ${progressInfo.percentage}%; background-color: var(--accent-blue);"></div>
-                     </div>`;
+      // Create SVG circular progress
+      const radius = 6;
+      const circumference = 2 * Math.PI * radius;
+      const strokeDashoffset =
+        circumference - (progressInfo.percentage / 100) * circumference;
+
+      return `<div class="icon-progress-circular">
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <circle 
+                    cx="8" 
+                    cy="8" 
+                    r="${radius}"
+                    fill="none"
+                    stroke="var(--text-primary)"
+                    stroke-width="2"
+                  />
+                  <circle 
+                    cx="8" 
+                    cy="8" 
+                    r="${radius}"
+                    fill="none"
+                    stroke="var(--accent)"
+                    stroke-width="2"
+                    stroke-dasharray="${circumference}"
+                    stroke-dashoffset="${strokeDashoffset}"
+                    stroke-linecap="round"
+                    transform="rotate(-90 8 8)"
+                    class="progress-circle"
+                  />
+                </svg>
+              </div>`;
     }
   }
 
