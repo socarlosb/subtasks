@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subtask App</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="columns-container">
+        <!-- Column 1: Main Tasks -->
+        <div class="column" data-column="0">
+          <div class="column-header">
+            <h2 class="column-title">Tasks</h2>
+            <button
+              class="copy-btn"
+              data-column="0"
+              aria-label="Copy tasks to clipboard"
+            >
+              📋
+            </button>
+          </div>
+          <div class="tasks-container" id="tasks-0">
+            <div class="empty-message">Add your task here...</div>
+          </div>
+        </div>
+
+        <!-- Column 2: Sub Tasks -->
+        <div class="column" data-column="1">
+          <div class="column-header">
+            <h2 class="column-title" id="column-title-1">Select a task</h2>
+            <button
+              class="copy-btn"
+              data-column="1"
+              aria-label="Copy subtasks to clipboard"
+              disabled
+            >
+              📋
+            </button>
+          </div>
+          <div class="tasks-container" id="tasks-1"></div>
+        </div>
+
+        <!-- Column 3: Sub-Sub Tasks -->
+        <div class="column" data-column="2">
+          <div class="column-header">
+            <h2 class="column-title" id="column-title-2">Select a subtask</h2>
+            <button
+              class="copy-btn"
+              data-column="2"
+              aria-label="Copy sub-subtasks to clipboard"
+              disabled
+            >
+              📋
+            </button>
+          </div>
+          <div class="tasks-container" id="tasks-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success message for clipboard copy -->
+    <div class="success-message" id="success-message">
+      Copied to clipboard successfully!
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
