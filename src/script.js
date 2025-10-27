@@ -151,6 +151,39 @@ class SubtaskApp {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.classList.add("connection-svg");
 
+    // Create gradient definitions
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+
+    // Gray to blue gradient
+    const grayToBlueGradient = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "linearGradient"
+    );
+    grayToBlueGradient.setAttribute("id", "grayToBlueGradient");
+    grayToBlueGradient.setAttribute("x1", "0%");
+    grayToBlueGradient.setAttribute("y1", "0%");
+    grayToBlueGradient.setAttribute("x2", "100%");
+    grayToBlueGradient.setAttribute("y2", "0%");
+
+    const stop1 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "stop"
+    );
+    stop1.setAttribute("offset", "0%");
+    stop1.setAttribute("stop-color", "#969696"); // gray
+
+    const stop2 = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "stop"
+    );
+    stop2.setAttribute("offset", "100%");
+    stop2.setAttribute("stop-color", "#0078d4"); // blue
+
+    grayToBlueGradient.appendChild(stop1);
+    grayToBlueGradient.appendChild(stop2);
+    defs.appendChild(grayToBlueGradient);
+    svg.appendChild(defs);
+
     // Create paths between selected items
     for (let i = 0; i < 2; i++) {
       if (
@@ -203,6 +236,12 @@ class SubtaskApp {
     path.setAttribute("d", pathData);
     path.classList.add("connection-path");
 
+    // Only apply gradient to the line connecting TO the final selection
+    const finalSelectionColumn = this.getFinalSelectionColumn();
+    if (toColumn === finalSelectionColumn && finalSelectionColumn > 0) {
+      path.classList.add("to-final");
+    }
+
     return path;
   }
 
@@ -230,6 +269,12 @@ class SubtaskApp {
 
     if (this.selectedPaths[columnIndex] === taskIndex) {
       div.classList.add("selected");
+
+      // Determine if this is the final (rightmost) selection
+      const isFinalSelection = this.getFinalSelectionColumn() === columnIndex;
+      if (isFinalSelection) {
+        div.classList.add("final-selection");
+      }
     }
 
     // Create icon
@@ -287,6 +332,16 @@ class SubtaskApp {
     div.appendChild(text);
 
     return div;
+  }
+
+  getFinalSelectionColumn() {
+    // Find the rightmost column that has a selection
+    for (let i = 2; i >= 0; i--) {
+      if (this.selectedPaths[i] !== null) {
+        return i;
+      }
+    }
+    return 0; // Default to first column if no selections
   }
 
   createProgressIcon(progressInfo) {
@@ -354,6 +409,20 @@ class SubtaskApp {
   }
 
   showAddInput(columnIndex) {
+    // Validate that parent columns have selections
+    if (columnIndex === 1 && this.selectedPaths[0] === null) {
+      // Cannot add to column 2 without selecting from column 1
+      return;
+    }
+
+    if (
+      columnIndex === 2 &&
+      (this.selectedPaths[0] === null || this.selectedPaths[1] === null)
+    ) {
+      // Cannot add to column 3 without selecting from both columns 1 and 2
+      return;
+    }
+
     const tasks = this.getTasksForColumn(columnIndex);
 
     if (tasks.length >= this.maxItemsPerColumn) {
@@ -387,6 +456,10 @@ class SubtaskApp {
         const title = input.value.trim();
         if (title) {
           this.addTask(columnIndex, title);
+          // Create new input for next entry if under limit
+          setTimeout(() => {
+            this.showAddInputIfPossible(columnIndex);
+          }, 50);
         }
         inputContainer.remove();
       }
@@ -406,6 +479,15 @@ class SubtaskApp {
     inputContainer.appendChild(input);
     container.appendChild(inputContainer);
     input.focus();
+  }
+
+  showAddInputIfPossible(columnIndex) {
+    const tasks = this.getTasksForColumn(columnIndex);
+
+    if (tasks.length < this.maxItemsPerColumn) {
+      this.showAddInput(columnIndex);
+    }
+    // If at limit, silently do nothing (no alert)
   }
 
   addTask(columnIndex, title) {
@@ -479,6 +561,10 @@ class SubtaskApp {
           task.title = newTitle;
           this.saveData();
           this.render();
+          // Create new input for next entry if under limit
+          setTimeout(() => {
+            this.showAddInputIfPossible(columnIndex);
+          }, 50);
         } else {
           this.deleteTask(task, columnIndex, taskIndex);
         }

@@ -185,10 +185,15 @@ body {
 }
 
 .task-item.selected {
-  background-color: var(--selected-bg);
+  background-color: var(--hover-bg);
   position: relative;
-  border: 2px solid var(--accent-primary);
+  border: 2px solid var(--border-color);
   border-radius: 4px;
+}
+
+.task-item.selected.final-selection {
+  background-color: var(--selected-bg);
+  border: 2px solid var(--accent-blue);
 }
 
 .task-item.selected::before {
@@ -198,8 +203,12 @@ body {
   top: -2px;
   bottom: -2px;
   width: 4px;
-  background-color: var(--accent-primary);
+  background-color: var(--border-color);
   border-radius: 2px 0 0 2px;
+}
+
+.task-item.selected.final-selection::before {
+  background-color: var(--accent-blue);
 }
 
 /* Hide the connecting arrow for the last column */
@@ -220,11 +229,15 @@ body {
 
 .connection-path {
   fill: none;
-  stroke: var(--accent-yellow);
+  stroke: var(--border-color);
   stroke-width: 2;
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
   animation: drawPath 0.5s ease-in-out forwards;
+}
+
+.connection-path.to-final {
+  stroke: url(#grayToBlueGradient);
 }
 
 @keyframes drawPath {
@@ -262,13 +275,19 @@ body {
 
 .task-input {
   background: var(--bg-primary);
-  border: 1px solid var(--accent-blue);
+  border: 2px solid var(--accent-blue);
   color: var(--text-primary);
-  padding: 6px 8px;
-  border-radius: 3px;
+  padding: 10px 12px;
+  border-radius: 8px;
   font-size: 14px;
   width: 100%;
   outline: none;
+  transition: all 0.2s ease;
+}
+
+.task-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
 }
 
 .task-input::placeholder {
@@ -324,10 +343,10 @@ body {
 }
 
 .checkbox {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border: 2px solid var(--checkbox-border);
-  border-radius: 3px;
+  border-radius: 4px;
   margin-right: 12px;
   cursor: pointer;
   display: flex;
@@ -335,22 +354,25 @@ body {
   justify-content: center;
   background-color: transparent;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .checkbox:hover {
-  border-color: var(--text-secondary);
+  border-color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .checkbox.checked {
-  background-color: var(--checkbox-checked);
-  border-color: var(--checkbox-checked);
+  background-color: transparent;
+  border-color: var(--checkbox-border);
   color: white;
 }
 
 .checkbox.checked::after {
   content: "✓";
-  font-size: 12px;
+  font-size: 14px;
   font-weight: bold;
+  line-height: 1;
 }
 
 .success-message {
