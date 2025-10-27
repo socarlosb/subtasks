@@ -60,6 +60,47 @@ class SubtaskApp {
         this.copyColumnToClipboard(column);
       });
     });
+
+    // Options menu events
+    const optionsBtn = document.getElementById("options-btn");
+    const optionsMenu = document.getElementById("options-menu");
+    const importBtn = document.getElementById("import-btn");
+    const exportBtn = document.getElementById("export-btn");
+
+    if (optionsBtn && optionsMenu) {
+      optionsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        optionsMenu.classList.toggle("show");
+      });
+
+      // Close options menu when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!optionsBtn.contains(e.target) && !optionsMenu.contains(e.target)) {
+          optionsMenu.classList.remove("show");
+        }
+      });
+
+      if (importBtn) {
+        importBtn.addEventListener("click", () => {
+          this.importData();
+          optionsMenu.classList.remove("show");
+        });
+      }
+
+      if (exportBtn) {
+        exportBtn.addEventListener("click", () => {
+          this.exportData();
+          optionsMenu.classList.remove("show");
+        });
+      }
+    }
+
+    // Handle window resize to redraw connections
+    window.addEventListener("resize", () => {
+      setTimeout(() => {
+        this.drawConnectionLines();
+      }, 100);
+    });
   }
 
   // Rendering
@@ -94,6 +135,75 @@ class SubtaskApp {
       document.querySelector('[data-column="1"] .copy-btn').disabled = true;
       document.querySelector('[data-column="2"] .copy-btn').disabled = true;
     }
+
+    // Draw connecting lines after rendering
+    this.drawConnectionLines();
+  }
+
+  drawConnectionLines() {
+    // Remove existing connection SVG
+    const existingSvg = document.querySelector(".connection-svg");
+    if (existingSvg) {
+      existingSvg.remove();
+    }
+
+    // Create SVG container
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("connection-svg");
+
+    // Create paths between selected items
+    for (let i = 0; i < 2; i++) {
+      if (
+        this.selectedPaths[i] !== null &&
+        this.selectedPaths[i + 1] !== null
+      ) {
+        const path = this.createConnectionPath(i, i + 1);
+        if (path) {
+          svg.appendChild(path);
+        }
+      }
+    }
+
+    if (svg.children.length > 0) {
+      document.querySelector(".columns-container").appendChild(svg);
+    }
+  }
+
+  createConnectionPath(fromColumn, toColumn) {
+    const fromElement = document.querySelector(
+      `[data-column="${fromColumn}"] .task-item.selected`
+    );
+    const toElement = document.querySelector(
+      `[data-column="${toColumn}"] .task-item.selected`
+    );
+
+    if (!fromElement || !toElement) return null;
+
+    const containerRect = document
+      .querySelector(".columns-container")
+      .getBoundingClientRect();
+    const fromRect = fromElement.getBoundingClientRect();
+    const toRect = toElement.getBoundingClientRect();
+
+    // Calculate positions relative to container
+    const fromX = fromRect.right - containerRect.left;
+    const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+    const toX = toRect.left - containerRect.left;
+    const toY = toRect.top + toRect.height / 2 - containerRect.top;
+
+    // Create curved path
+    const controlX1 = fromX + (toX - fromX) * 0.5;
+    const controlY1 = fromY;
+    const controlX2 = fromX + (toX - fromX) * 0.5;
+    const controlY2 = toY;
+
+    const pathData = `M ${fromX} ${fromY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${toX} ${toY}`;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", pathData);
+    path.classList.add("connection-path");
+
+    return path;
   }
 
   renderColumn(columnIndex, tasks) {
@@ -470,6 +580,66 @@ class SubtaskApp {
     setTimeout(() => {
       message.classList.remove("show");
     }, 2000);
+  }
+
+  // Import/Export functionality
+  exportData() {
+    try {
+      const dataStr = JSON.stringify(this.data, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `subtasks-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      this.showSuccessMessage();
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Export failed. Please try again.");
+    }
+  }
+
+  importData() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+
+          // Basic validation
+          if (Array.isArray(importedData)) {
+            const confirmed = confirm(
+              "This will replace all your current tasks. Are you sure?"
+            );
+            if (confirmed) {
+              this.data = importedData;
+              this.selectedPaths = [null, null, null];
+              this.saveData();
+              this.render();
+              this.showSuccessMessage();
+            }
+          } else {
+            throw new Error("Invalid file format");
+          }
+        } catch (error) {
+          console.error("Import failed:", error);
+          alert("Import failed. Please check the file format.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    input.click();
   }
 }
 

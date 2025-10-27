@@ -12,7 +12,16 @@
         <!-- Column 1: Main Tasks -->
         <div class="column" data-column="0">
           <div class="column-header">
-            <h2 class="column-title">Tasks</h2>
+            <div class="column-header-left">
+              <button class="options-btn" id="options-btn" aria-label="Options">
+                ⚙️
+              </button>
+              <div class="options-menu" id="options-menu">
+                <button id="import-btn">Import</button>
+                <button id="export-btn">Export</button>
+              </div>
+              <h2 class="column-title">Tasks</h2>
+            </div>
             <button
               class="copy-btn"
               data-column="0"
@@ -64,6 +73,15 @@
     <div class="success-message" id="success-message">
       Copied to clipboard successfully!
     </div>
+
+    <!-- Hidden file input for import -->
+    <input
+      type="file"
+      id="import-input"
+      accept=".json"
+      class="hidden"
+      aria-label="Import file"
+    />
 
     <script src="script.js"></script>
   </body>

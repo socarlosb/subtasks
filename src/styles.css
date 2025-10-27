@@ -1,15 +1,17 @@
 :root {
   --bg-primary: #1e1e1e;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #383838;
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --accent-blue: #007acc;
-  --accent-blue-light: #0099ff;
-  --border-color: #454545;
-  --success-green: #4caf50;
-  --hover-bg: #404040;
-  --selected-bg: #264f78;
+  --bg-secondary: #252526;
+  --bg-tertiary: #2d2d30;
+  --text-primary: #cccccc;
+  --text-secondary: #969696;
+  --text-tertiary: #6a6a6a;
+  --accent-blue: #0078d4;
+  --accent-yellow: #ffb900;
+  --border-color: #3c3c3c;
+  --hover-bg: #2a2d2e;
+  --selected-bg: #094771;
+  --checkbox-border: #6a6a6a;
+  --checkbox-checked: #0078d4;
 }
 
 * {
@@ -34,14 +36,17 @@ body {
 
 .columns-container {
   display: flex;
+  flex-direction: row;
   height: 100%;
+  width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  position: relative;
 }
 
 .column {
+  flex: 1;
   min-width: 300px;
-  width: 300px;
   background-color: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -61,6 +66,64 @@ body {
   background-color: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
   min-height: 60px;
+}
+
+.column-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.options-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.options-btn:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.options-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 0;
+  display: none;
+  z-index: 1000;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.options-menu.show {
+  display: block;
+}
+
+.options-menu button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  padding: 8px 16px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.options-menu button:hover {
+  background-color: var(--hover-bg);
 }
 
 .column-title {
@@ -83,7 +146,6 @@ body {
 
 .copy-btn:hover:not(:disabled) {
   background-color: var(--hover-bg);
-  border-color: var(--accent-blue);
   color: var(--text-primary);
 }
 
@@ -124,8 +186,51 @@ body {
 
 .task-item.selected {
   background-color: var(--selected-bg);
-  border-left: 3px solid var(--accent-blue);
-  padding-left: 9px;
+  position: relative;
+  border: 2px solid var(--accent-primary);
+  border-radius: 4px;
+}
+
+.task-item.selected::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: -2px;
+  bottom: -2px;
+  width: 4px;
+  background-color: var(--accent-primary);
+  border-radius: 2px 0 0 2px;
+}
+
+/* Hide the connecting arrow for the last column */
+.column[data-column="2"] .task-item.selected::after {
+  display: none;
+}
+
+/* SVG connection lines container */
+.connection-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.connection-path {
+  fill: none;
+  stroke: var(--accent-yellow);
+  stroke-width: 2;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 0.5s ease-in-out forwards;
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .task-item.editing {
@@ -177,16 +282,16 @@ body {
 
 /* Progress Icons */
 .icon-empty {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--text-secondary);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text-tertiary);
   border-radius: 50%;
 }
 
 .icon-progress {
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--accent-blue);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--text-secondary);
   border-radius: 50%;
   position: relative;
   overflow: hidden;
@@ -198,19 +303,19 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--accent-blue);
+  background-color: var(--text-secondary);
   transition: height 0.3s ease;
 }
 
 .icon-complete {
-  width: 14px;
-  height: 14px;
-  background-color: var(--success-green);
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-secondary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--bg-primary);
   font-size: 10px;
 }
 
@@ -219,9 +324,9 @@ body {
 }
 
 .checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-color);
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--checkbox-border);
   border-radius: 3px;
   margin-right: 12px;
   cursor: pointer;
@@ -232,9 +337,13 @@ body {
   transition: all 0.2s ease;
 }
 
+.checkbox:hover {
+  border-color: var(--text-secondary);
+}
+
 .checkbox.checked {
-  background-color: var(--accent-blue);
-  border-color: var(--accent-blue);
+  background-color: var(--checkbox-checked);
+  border-color: var(--checkbox-checked);
   color: white;
 }
 
@@ -246,13 +355,13 @@ body {
 
 .success-message {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
-  background-color: var(--success-green);
-  color: white;
+  background-color: var(--text-secondary);
+  color: var(--bg-primary);
   padding: 12px 20px;
   border-radius: 4px;
-  transform: translateX(100%);
+  transform: translateX(110%);
   transition: transform 0.3s ease;
   z-index: 1000;
   font-size: 14px;
@@ -260,7 +369,11 @@ body {
 }
 
 .success-message.show {
-  transform: translateX(0);
+  transform: translateX(-5%);
+}
+
+.hidden {
+  display: none;
 }
 
 /* Mobile responsive */
