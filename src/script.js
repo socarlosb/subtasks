@@ -55,8 +55,8 @@ class SubtaskApp {
 
     // Copy button events
     document.querySelectorAll(".copy-btn").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        const column = parseInt(e.target.dataset.column);
+      btn.addEventListener("click", () => {
+        const column = parseInt(btn.dataset.column);
         this.copyColumnToClipboard(column);
       });
     });
@@ -657,6 +657,23 @@ class SubtaskApp {
     return [];
   }
 
+  getColumnTitle(columnIndex) {
+    if (columnIndex === 0) {
+      return "All Tasks";
+    } else if (columnIndex === 1 && this.selectedPaths[0] !== null) {
+      return this.data[this.selectedPaths[0]].title;
+    } else if (
+      columnIndex === 2 &&
+      this.selectedPaths[0] !== null &&
+      this.selectedPaths[1] !== null
+    ) {
+      const parentTask = this.data[this.selectedPaths[0]];
+      const parentSubtask = parentTask.tasks[this.selectedPaths[1]];
+      return parentSubtask.title;
+    }
+    return "";
+  }
+
   // Task Editing
   startEdit(task, textElement, columnIndex, taskIndex) {
     this.editingElement = textElement;
@@ -754,17 +771,19 @@ class SubtaskApp {
     const tasks = this.getTasksForColumn(columnIndex);
     if (tasks.length === 0) return;
 
+    const clipHeader = this.getColumnTitle(columnIndex) || "Tasks";
     const taskList = tasks.map((task) => `- ${task.title}`).join("\n");
+    const fullText = `${clipHeader}\n${taskList}`;
 
     navigator.clipboard
-      .writeText(taskList)
+      .writeText(fullText)
       .then(() => {
         this.showSuccessMessage();
       })
       .catch(() => {
         // Fallback for older browsers
         const textArea = document.createElement("textarea");
-        textArea.value = taskList;
+        textArea.value = fullText;
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand("copy");
